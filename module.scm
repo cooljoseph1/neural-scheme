@@ -8,13 +8,31 @@
 (load "utils.scm")
 
 
+
+;;; Define what a module is:
+
+
+
+
+(define make-neuron forward backward
+  (list forward backward '() '()))
+
+
+(define make-neuron forward backward num-inputs)
+
+
+;;; Functions that a module should have:
+
+
+
+
 ;;; Create a module given a procedure that implements the forward pass and
 ;;; a procedure that implements the backward pass.
 ;;; TODO: Compile an automatic backward procedure out of the forward one
 ;;; TODO 2: Make a module save information along the way as it goes forward
 ;;;         so the backward pass can be done correctly
 (define (make-module forward backward)
-  (cons forward backward))
+  (list forward backward '() '()))
 
 ;;; Return the forward procedure of a module
 (define (get-forward module)
@@ -37,3 +55,5 @@
 (define (compose-modules module2 module1)
   (make-module (compose (get-forward module2) (get-forward module1))       ; Forward pass
                (compose (get-backward module1) (get-backward module2))))   ; Backward pass
+
+               
