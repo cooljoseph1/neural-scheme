@@ -98,6 +98,18 @@ A neuron always has the following properties:
 (define (mult-backward inputs grad)
   (list (* grad (cadr inputs)) (* grad (car inputs))))
 
+;;; Function that returns a neuron that multiplies together two inputs
 (define (mult-neuron)
   (make-neuron mult-forward mult-backward))
+
+#| Make a neuron that performs the identity function
+(define (identity-forward x) x)
+
+(define (identity-backward inputs grad) inputs)
+
+;;; Function that returns an identity neuron
+(define (identity-neuron)
+  (make-neuron identity-forward identity-backward))
+
+
 
