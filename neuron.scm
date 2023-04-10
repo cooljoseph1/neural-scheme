@@ -92,7 +92,7 @@ A neuron always has the following properties:
   (map (lambda (x) grad) inputs))
 
 ;;; Function that returns a neuron that adds together its inputs
-(define (add-neuron)
+(define (make-add-neuron)
   (make-neuron add-forward add-backward))
 
 #| Make a neuron that multiplies together exactly two inputs |#
@@ -103,7 +103,7 @@ A neuron always has the following properties:
   (list (* grad (cadr inputs)) (* grad (car inputs))))
 
 ;;; Function that returns a neuron that multiplies together two inputs
-(define (mult-neuron)
+(define (make-mult-neuron)
   (make-neuron mult-forward mult-backward))
 
 #| Make a neuron that performs the identity function |#
@@ -112,7 +112,7 @@ A neuron always has the following properties:
 (define (identity-backward inputs output grad) inputs)
 
 ;;; Function that returns an identity neuron
-(define (identity-neuron)
+(define (make-identity-neuron)
   (make-neuron identity-forward identity-backward))
 
 #| Make a neuron that performs ReLU |#
@@ -125,5 +125,5 @@ A neuron always has the following properties:
       (list grad)))
 
 ;;; Function that returns a ReLU neuron
-(define (relu-neuron)
+(define (make-relu-neuron)
   (make-neuron relu-forward relu-backward))
