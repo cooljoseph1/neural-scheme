@@ -128,7 +128,7 @@ A neuron always has the following properties:
   (/ 1 (+ 1 (exp (- x)))))
 
 (define (sigmoid-backward inputs output grad)
-  (list (* output (- 1 output))))
+  (list (* grad output (- 1 output))))
 
 ;;; Make a sigmoid neuron (single input one output)
 (define (make-sigmoid-neuron)
@@ -139,7 +139,7 @@ A neuron always has the following properties:
   (/ (- 1 (exp (- (* 2 x)))) (+ 1 (exp (- (* 2 x))))))
 
 (define (tanh-backward inputs output grad)
-  (list (- 1 (* output output))))
+  (list (- grad (* grad output output))))
 
 ;;; Make a sigmoid neuron (single input one output)
 (define (make-tanh-neuron)
@@ -148,7 +148,7 @@ A neuron always has the following properties:
 #| Misc. other neurons |#
 (define (identity-forward x) x)
 
-(define (identity-backward inputs output grad) inputs)
+(define (identity-backward inputs output grad) (list grad))
 
 ;;; Function that returns an identity neuron
 (define (make-identity-neuron)
