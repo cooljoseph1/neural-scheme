@@ -80,90 +80,24 @@ A neuron always has the following properties:
                                  (iota (length input-neurons)))))
 
 
-;;; Make a basic neuron. It has a forward function that takes in arbitrarily many inputs
-;;; and returns a single output, and a backward function that takes in a single output gradient
-;;; and returns arbitrarily many input gradients.
-
-;;; Create an activation function
-;;; Args:
-;;;  f: The activation function.
-;;;  df: A function that takes in
-
-(define (relu)
-  (let* ((bound-df (lambda ))
-         (f (lambda (x) (max 0 x))
-
-;;; Create a neuron. This takes two arguments and returns a neuron.
-;;; Args:
-;;;  activation: A (nonlinear) function that takes a single input and returns a single output
-;;;  activation-derivative: The partial derivative of the output with respect to the input
-
-(define (make-neuron forward-func backward-func)
-  (let* ((input-neurons '())  ; A list of all neurons feeding into this neuron. Used for forward pass
-         (output-neurons '()) ; A list of all neurons this neuron's fire value is sent to. Used for backpropagation
-         ;; Where the backward function with bound inputs is stored
-         (bound-backward (lambda grad (error "Backward graph not created!"))) ; By default it throws an error because it shouldn't be called before a forward pass
-
-         ;; Helper function to bind inputs to the backward function
-         (bind! (lambda (inputs)
-                        (set! bound-backward
-                              (lambda (grad) (backward inputs grad)))))
-         
-         ;; Function to do a forward pass through this neuron
-         (forward-pass (lambda ()
-                          (let ((inputs (map neuron:forward input-neurons)))  ; Get the fire values of the input neurons
-                            (begin
-                              (bind! inputs)                                  ; Bind inputs for back propagation
-                              (apply forward inputs))))
-         ;; Function to do a backward pass through this neuron (returning the gradients for its inputs)
-         (backward-pass (lambda () (bound-backward grad))))
-    (cons forward-pass backward-pass)))
-
-(define (neuron:get-forward neuron)
-  (car neuron))
-
-(define (neuron:get-backward neuron)
-  (cdr neuron))
-  
-(define (neuron:forward neuron inputs)
-  (apply (neuron:get-forward neuron) inputs))
-
-(define (neuron:backward neuron output)
-  ((neuron:get-backward neuron) output))
-
-#| Now make some primitive neurons |#
-;;; Neuron for adding things together
-(define (add-forward . inputs)
-  (apply + inputs))
+#| Make a neuron that adds together all its inputs |#
+(define (add-forward . args)
+  (+ args))
 
 (define (add-backward inputs grad)
   (map (lambda (x) grad) inputs))
 
-(define +-neuron
-  (lambda () (make-neuron add-forward add-backward)))
+;;; Function that returns a neuron that adds together its inputs
+(define (add-neuron)
+  (make-neuron add-forward add-backward))
 
-;;; Neuron for multiplying two things together
+#| Make a neuron that multiplies together exactly two inputs
 (define (mult-forward x y)
   (* x y))
 
 (define (mult-backward inputs grad)
-  (let ((x (car inputs))
-        (y (cadr inputs)))
-    ((* grad y) (* grad x))))
+  (list (* grad (cadr inputs)) (* grad (car inputs))))
 
-(define *-neuron
-  (lambda () (make-neuron mult-forward mult-backward)))
-
-;;; Relu activation function
-(define (relu-forward input)
-  (max 0 input))
-
-(define (relu-backward inputs grad)
-  (if (< (car inputs) 0)
-    0
-    grad))
-
-(define relu-neuron
-  (lambda () (make-neuron relu-forward relu-backward)))
-
+(define (mult-neuron)
+  (make-neuron mult-forward mult-backward))
 
