@@ -16,26 +16,30 @@ A neuron always has the following properties:
          
          (inputs #f) ; A list of inputs that the input neurons fired with (used in back propagation)
          (gradients #f) ; A vector of gradients of the loss with respect to each of the input neurons (in order)
+
+         (output #f) ; A saved output (for memoization)
          
          ;; Function to do a forward pass through this neuron
          (forward-pass (lambda ()
-                               (if inputs
-                                   (apply forward inputs)
+                               (if output
+                                   output
                                    (begin
                                      (set! inputs (map neuron:fire input-neurons))
-                                     (apply forward inputs)))))
+                                     (set! output (apply forward inputs))
+                                     output))))
          (backward-pass (lambda ()
                                 (if gradients
                                     gradients
                                     (let* ((right-grad (apply + (map apply back-props)))
-                                           (grad-list (backward-func inputs right-grad)))
+                                           (grad-list (backward-func inputs output right-grad)))
                                        (begin
                                          (set! gradients (list->vector grad-list))
                                          gradients)))))
 
          (reset! (lambda () (begin
                               (set! inputs #f)
-                              (set! gradients #f))))
+                              (set! gradients #f)
+                              (set! output #f))))
 
          ;; Setter function for the list of input neurons
          (define (set-input-neurons! new-input-neurons) (set! input-neurons new-input-neurons))
@@ -84,7 +88,7 @@ A neuron always has the following properties:
 (define (add-forward . args)
   (+ args))
 
-(define (add-backward inputs grad)
+(define (add-backward inputs output grad)
   (map (lambda (x) grad) inputs))
 
 ;;; Function that returns a neuron that adds together its inputs
@@ -95,7 +99,7 @@ A neuron always has the following properties:
 (define (mult-forward x y)
   (* x y))
 
-(define (mult-backward inputs grad)
+(define (mult-backward inputs output grad)
   (list (* grad (cadr inputs)) (* grad (car inputs))))
 
 ;;; Function that returns a neuron that multiplies together two inputs
@@ -105,7 +109,7 @@ A neuron always has the following properties:
 #| Make a neuron that performs the identity function
 (define (identity-forward x) x)
 
-(define (identity-backward inputs grad) inputs)
+(define (identity-backward inputs output grad) inputs)
 
 ;;; Function that returns an identity neuron
 (define (identity-neuron)
