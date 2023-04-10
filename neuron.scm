@@ -84,38 +84,33 @@ A neuron always has the following properties:
                                  (iota (length input-neurons)))))
 
 
-#| Make a neuron that adds together all its inputs |#
+#| Primitive types of neurons |#
+
+#| Arithmetic neurons |#
+;;; Add
 (define (add-forward . args)
   (+ args))
 
 (define (add-backward inputs output grad)
   (map (lambda (x) grad) inputs))
 
-;;; Function that returns a neuron that adds together its inputs
+;;; Make an add neuron
 (define (make-add-neuron)
   (make-neuron add-forward add-backward))
 
-#| Make a neuron that multiplies together exactly two inputs |#
+;;; Multiply
 (define (mult-forward x y)
   (* x y))
 
 (define (mult-backward inputs output grad)
   (list (* grad (cadr inputs)) (* grad (car inputs))))
 
-;;; Function that returns a neuron that multiplies together two inputs
+;;; Make a multiply neuron (exactly two inputs)
 (define (make-mult-neuron)
   (make-neuron mult-forward mult-backward))
 
-#| Make a neuron that performs the identity function |#
-(define (identity-forward x) x)
-
-(define (identity-backward inputs output grad) inputs)
-
-;;; Function that returns an identity neuron
-(define (make-identity-neuron)
-  (make-neuron identity-forward identity-backward))
-
-#| Make a neuron that performs ReLU |#
+#| Activation neurons |#
+;;; ReLU
 (define (relu-forward x)
   (max 0 x))
 
@@ -124,6 +119,37 @@ A neuron always has the following properties:
       (list 0)
       (list grad)))
 
-;;; Function that returns a ReLU neuron
+;;; Make a ReLU neuron (single input one output)
 (define (make-relu-neuron)
   (make-neuron relu-forward relu-backward))
+
+;;; Sigmoid
+(define (sigmoid-forward x)
+  (/ 1 (+ 1 (exp (- x)))))
+
+(define (sigmoid-backward inputs output grad)
+  (list (* output (- 1 output))))
+
+;;; Make a sigmoid neuron (single input one output)
+(define (make-sigmoid-neuron)
+  (make-neuron sigmoid-forward sigmoid-backward))
+
+;;; tanh
+(define (tanh-forward x)
+  (/ (- 1 (exp (- (* 2 x)))) (+ 1 (exp (- (* 2 x))))))
+
+(define (tanh-backward inputs output grad)
+  (list (- 1 (* output output))))
+
+;;; Make a sigmoid neuron (single input one output)
+(define (make-tanh-neuron)
+  (make-neuron tanh-forward tanh-backward))
+
+#| Misc. other neurons |#
+(define (identity-forward x) x)
+
+(define (identity-backward inputs output grad) inputs)
+
+;;; Function that returns an identity neuron
+(define (make-identity-neuron)
+  (make-neuron identity-forward identity-backward))
