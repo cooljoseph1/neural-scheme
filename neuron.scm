@@ -12,25 +12,30 @@ A neuron always has the following properties:
 ;;; respect to the inputs.
 (define (make-neuron forward-func backward-func)
   (let* ((input-neurons '())  ; A list of all neurons feeding into this neuron. Used for forward pass
-         (back-props '()) ; A list of all neurons this neuron's fire value is sent to. Used for backpropagation
-         ;; Where the backward function with bound inputs is stored
-         (bound-backward (lambda grad (error "Backward graph not created!"))) ; By default it throws an error because it shouldn't be called before a forward pass
-
-         ;; Helper function to bind inputs to the backward function
-         (bind! (lambda (inputs)
-                        (set! bound-backward
-                              (lambda (grad) (backward inputs grad)))))
+         (back-props '()) ; A list of back propagation functions that need to accumulate at the right side of this neuron
+         
+         (inputs #f) ; A list of inputs that the input neurons fired with (used in back propagation)
+         (gradients #f) ; A vector of gradients of the loss with respect to each of the input neurons (in order)
          
          ;; Function to do a forward pass through this neuron
          (forward-pass (lambda ()
-                          (let ((inputs (map neuron:fire input-neurons)))  ; Get the fire values of the input neurons
-                            (begin
-                              (bind! inputs)                                  ; Bind inputs for back propagation
-                              (apply forward inputs)))))
-         ;; Function to do a backward pass through this neuron (returning the gradients for its inputs)
+                               (if inputs
+                                   (apply forward inputs)
+                                   (begin
+                                     (set! inputs (map neuron:fire input-neurons))
+                                     (apply forward inputs)))))
          (backward-pass (lambda ()
-                                (let ((output-gradient (apply + (map (lambda (b) (b)) back-props))))
-                                  (bound-backward output-gradient))))
+                                (if gradients
+                                    gradients
+                                    (let* ((right-grad (apply + (map apply back-props)))
+                                           (grad-list (backward-func inputs right-grad)))
+                                       (begin
+                                         (set! gradients (list->vector grad-list))
+                                         gradients)))))
+
+         (reset! (lambda () (begin
+                              (set! inputs #f)
+                              (set! gradients #f))))
 
          ;; Setter function for the list of input neurons
          (define (set-input-neurons! new-input-neurons) (set! input-neurons new-input-neurons))
@@ -52,34 +57,27 @@ A neuron always has the following properties:
 (define (neuron:grad neuron)
   ((neuron:get-backward neuron)))
 
-(define (neuron:get-inputs-setter neuron)
+(define (neuron:inputs-setter neuron)
   (caddr neuron))
 
-(define (neuron:add-back-prop neuron)
+(define (neuron:set-input-neurons! neuron input-neurons)
+  ((neuron:inputs-setter neuron) input-neurons))
+
+(define (neuron:back-prop-adder neuron)
   (cadddr neuron))
 
-
-;;; Set the inputs of a neuron to the given input neurons, returning a list of back-propagation
-;;; functions (one for each input neuron)
-(define (neuron:bind-inputs! neuron input-neurons)
-  ;; Step one: set the neuron's input neurons to input-neurons
-  ((neuron:get-inputs-setter neuron) input-neurons)
-  ;; Step two: Generate a list of functions for the back propagation
-  (let* ((gradients #f)                       ; A saved vector of the gradients of the neuron with respect to the output of each input neuron
-         (back-props (map (lambda (index)     ;  Note: A vector is used to speed up access
-                                  (lambda ()
-                                          (if gradients (vector-ref gradients index)
-                                                      (begin
-                                                        (set! gradients (list->vector (neuron:grad neuron)))
-                                                        (vector-ref gradients index)))))
-                          (get-indexes (length input-neurons)))))
-    back-props))
+(define (neuron:add-back-prop! neuron back-prop)
+  ((neuron:back-prop-adder neuron) back-prop))
 
 ;;; Join a neuron together with its input neurons by binding the input neurons to the neuron's inputs and
 ;;; linking together their back propagation
 (define (neuron:join! input-neurons neuron)
-  (let ((back-props (neuron:bind-inputs! neuron input-neurons)))
-    (map neuron:add-back-prop input-neurons back-props)))
+  (neuron:set-input-neurons! neuron input-neurons)
+  (map neuron:add-back-prop! input-neurons
+                            (map (lambda (index)
+                                         (lammbda ()
+                                                  (vector-ref (neuron:grad neuron) index)))
+                                 (iota (length input-neurons)))))
 
 
 ;;; Make a basic neuron. It has a forward function that takes in arbitrarily many inputs
