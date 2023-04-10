@@ -95,7 +95,7 @@ A neuron always has the following properties:
 (define (add-neuron)
   (make-neuron add-forward add-backward))
 
-#| Make a neuron that multiplies together exactly two inputs
+#| Make a neuron that multiplies together exactly two inputs |#
 (define (mult-forward x y)
   (* x y))
 
@@ -106,7 +106,7 @@ A neuron always has the following properties:
 (define (mult-neuron)
   (make-neuron mult-forward mult-backward))
 
-#| Make a neuron that performs the identity function
+#| Make a neuron that performs the identity function |#
 (define (identity-forward x) x)
 
 (define (identity-backward inputs output grad) inputs)
@@ -115,5 +115,15 @@ A neuron always has the following properties:
 (define (identity-neuron)
   (make-neuron identity-forward identity-backward))
 
+#| Make a neuron that performs ReLU |#
+(define (relu-forward x)
+  (max 0 x))
 
+(define (relu-backward inputs output grad)
+  (if (< output 0)
+      (list 0)
+      (list grad)))
 
+;;; Function that returns a ReLU neuron
+(define (relu-neuron)
+  (make-neuron relu-forward relu-backward))
