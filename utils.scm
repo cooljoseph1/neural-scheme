@@ -6,13 +6,6 @@
          (else (set-car! lst (car new-values))
                (replace-list! (cdr lst) (cdr new-values)))))
 
-;;; Get a list (0 1 ... n-1) for a list that is of length n
-(define (get-indexes n)
-  (let loop ((idx (- n 1)) (indexes '()))
-    (cond ((< idx 0) indexes)
-          (else (loop (- idx 1)
-                      (cons idx indexes))))))
-
 ;;; Compose two functions together
 (define (compose f g)
   (lambda args

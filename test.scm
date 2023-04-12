@@ -2,4 +2,4 @@
 
 (load "module.scm")
 (define test-module (module-fc 2 3))
-(module:forward test-module (list 1 2))
+(module:forward test-module (list 3 2))

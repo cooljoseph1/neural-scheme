@@ -38,7 +38,7 @@
 
 ;;; Return a parameter with a random weight chosen uniformly at random between lower and upper
 (define (param-uniform-random . args)
-  (let* ((lower (if (null? args) -100 (car args)))
-         (upper (if (null? args) -99 (if (null? (cdr args)) -99 (cadr args))))
-         (weight (+ lower (* (random) (- upper lower)))))
+  (let* ((lower (if (null? args) -1 (car args)))
+         (upper (if (null? args) 1 (if (null? (cdr args)) 1 (cadr args))))
+         (weight (+ lower (* (random 1.0) (- upper lower)))))
     (param weight)))

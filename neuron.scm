@@ -25,7 +25,7 @@ A neuron always has the following properties:
                                    output
                                    (begin
                                      (set! inputs (map neuron:fire input-neurons))
-                                     (set! output (apply forward inputs))
+                                     (set! output (apply forward-func inputs))
                                      output))))
          (backward-pass (lambda ()
                                 (if gradients
@@ -47,7 +47,9 @@ A neuron always has the following properties:
          (define (set-input-neurons! new-input-neurons) (set! input-neurons new-input-neurons))
 
          ;; Add a back propagation function to our list of back propagation functions
-         (define (add-back-prop! back-prop) (set! back-props (cons back-prop back-props)))
+         (define (add-back-prop! back-prop) (begin
+          (display "..#")
+          (set! back-props (cons back-prop back-props))))
 
     (list forward-pass backward-pass set-input-neurons! add-back-prop! reset!)))
 
@@ -88,7 +90,7 @@ A neuron always has the following properties:
   (neuron:set-input-neurons! neuron input-neurons)
   (map neuron:add-back-prop! input-neurons
                             (map (lambda (index)
-                                         (lammbda ()
+                                         (lambda ()
                                                   (vector-ref (neuron:grad neuron) index)))
                                  (iota (length input-neurons)))))
 
@@ -98,7 +100,7 @@ A neuron always has the following properties:
 #| Arithmetic neurons |#
 ;;; Add
 (define (add-forward . args)
-  (+ args))
+  (apply + args))
 
 (define (add-backward inputs output grad)
   (map (lambda (x) grad) inputs))

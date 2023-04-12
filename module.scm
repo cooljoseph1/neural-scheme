@@ -29,7 +29,7 @@
   (cadr module))
 
 ;;; Return the parameters of the module
-(define (module:get-parameters module)
+(define (module:get-params module)
   (caddr module))
 
 ;;; Return the reset function of the module
@@ -49,7 +49,7 @@
         (error "Did not supply correct number of inputs to a module" module inputs (length module) (length inputs)))
     (let* ((old-inputs (map module:get-input-neurons input-neurons))
            (temp-inputs (map make-input-neuron inputs))
-           (temp-module (module:neuron-list temp-inputs)))
+           (temp-module (apply module:neuron-list temp-inputs)))
       (module:join! temp-module module)
       ;; Step 2: Get the outputs of the forward pass
       (let ((outputs (map neuron:fire (module:get-output-neurons module))))
@@ -76,7 +76,7 @@
     (map (lambda (input output) (neuron:join! (list input) output)) outputs1 inputs2)
     (make-module (module:get-input-neurons module1)
                  (module:get-output-neurons module2)
-                 (append (module:get-parameters module1) (module:get-parameters module2))
+                 (append (module:get-params module1) (module:get-params module2))
                  (lambda () (begin
                               (module:reset! module1)
                               (module:reset! module2))))))
@@ -142,9 +142,9 @@
 ;;; Return a fully connected layer with the corresponding number of inputs and outputs
 (define (module-fc num-inputs num-outputs)
   (let* ((input-neurons (map (lambda (x) (make-identity-neuron)) (iota num-inputs)))
-         (perceptrons (map (lambda (x) (module-perceptron input-neurons))) (iota num-outputs))
+         (perceptrons (map (lambda (x) (module-perceptron input-neurons)) (iota num-outputs)))
          (output-neurons (apply append (map module:get-output-neurons perceptrons)))
-         (params (apply append (map module:get-params modules))))
+         (params (apply append (map module:get-params perceptrons))))
     (make-module input-neurons
                  output-neurons
                  params
