@@ -36,10 +36,12 @@ A neuron always has the following properties:
                                          (set! gradients (list->vector grad-list))
                                          gradients)))))
 
-         (reset! (lambda () (begin
-                              (set! inputs #f)
-                              (set! gradients #f)
-                              (set! output #f))))
+         (reset! (lambda () (if output (begin                ; We don't need to reset if we already are reset
+                                         (set! inputs #f)
+                                         (set! gradients #f)
+                                         (set! output #f))
+                                      #f))))
+                                      
 
          ;; Setter function for the list of input neurons
          (define (set-input-neurons! new-input-neurons) (set! input-neurons new-input-neurons))
@@ -47,7 +49,7 @@ A neuron always has the following properties:
          ;; Add a back propagation function to our list of back propagation functions
          (define (add-back-prop! back-prop) (set! back-props (cons back-prop back-props)))
 
-    (list forward-pass backward-pass set-input-neurons! add-back-prop!)))
+    (list forward-pass backward-pass set-input-neurons! add-back-prop! reset!)))
 
 (define (neuron:get-forward neuron)
   (car neuron))
@@ -72,6 +74,13 @@ A neuron always has the following properties:
 
 (define (neuron:add-back-prop! neuron back-prop)
   ((neuron:back-prop-adder neuron) back-prop))
+
+(define (neuron:reset-getter neuron)
+  (caddr (cddr neuron)))
+
+;;; Reset to prepare for a new forward pass
+(define (neuron:reset! neuron)
+  (neuron:reset-getter neuron))
 
 ;;; Join a neuron together with its input neurons by binding the input neurons to the neuron's inputs and
 ;;; linking together their back propagation
@@ -153,3 +162,7 @@ A neuron always has the following properties:
 ;;; Function that returns an identity neuron
 (define (make-identity-neuron)
   (make-neuron identity-forward identity-backward))
+
+;;; Neuron that always fires the same value
+(define (make-input-neuron value)
+  (make-neuron (lambda x value) (lambda (inputs output grad) 0)))
