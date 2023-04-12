@@ -47,9 +47,8 @@ A neuron always has the following properties:
          (define (set-input-neurons! new-input-neurons) (set! input-neurons new-input-neurons))
 
          ;; Add a back propagation function to our list of back propagation functions
-         (define (add-back-prop! back-prop) (begin
-          (display "..#")
-          (set! back-props (cons back-prop back-props))))
+         (define (add-back-prop! back-prop)
+                 (set! back-props (cons back-prop back-props)))
 
     (list forward-pass backward-pass set-input-neurons! add-back-prop! reset!)))
 
@@ -82,7 +81,7 @@ A neuron always has the following properties:
 
 ;;; Reset to prepare for a new forward pass
 (define (neuron:reset! neuron)
-  (neuron:reset-getter neuron))
+  ((neuron:reset-getter neuron)))
 
 ;;; Join a neuron together with its input neurons by binding the input neurons to the neuron's inputs and
 ;;; linking together their back propagation

@@ -149,7 +149,7 @@
                  output-neurons
                  params
                  (lambda () (begin
-                              (map neuron:reset! input-neruons)
+                              (map neuron:reset! input-neurons)
                               (map module:reset! perceptrons))))))
     
                                 
