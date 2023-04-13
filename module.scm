@@ -42,17 +42,32 @@
 
 ;;; Given a list of inputs, run it through the module. (Note: This is mostly only so complicated because we have to attach temporary inputs)
 (define (module:forward module inputs)
-  ;; Step 1: Create temporary inputs and attach them to the input neurons
+  ;; Step 1: Check to make sure the number of inputs is correct
   (let ((input-neurons (module:get-input-neurons module)))
     (if (= (length input-neurons) (length inputs))
         #t
-        (error "Did not supply correct number of inputs to a module" module inputs (length module) (length inputs)))
+        (error "Did not supply correct number of inputs to the module" module inputs (length module) (length inputs)))
     ;; Step 2: Set the inputs for those neurons to the provided inputs
     (map neuron:set-raw-inputs! input-neurons inputs)
     ;; Step 3: Get the return values of the outputs firing
     (map neuron:fire (module:get-output-neurons module))))
-;;; Given a list of gradients at the output neuron, run a backward pass to get the gradients at the parameters
-;;; (define (module:backward module gradients)
+
+;;; Given a list of losses (negatives of gradients) at the output neurons, run a backward pass to get the gradients at the parameters
+(define (module:backward! module losses)
+  ;; Step 1: Check to make sure the number of losses is correct
+  (let ((output-neurons (module:get-output-neurons module)))
+    (if (= (length output-neurons) (length losses))
+        #t
+        (error "Did not supply correct number of losses to the module" module inputs (length module) (length inputs)))
+    ;; Step 2: Set the losses for those neurons to the provided losses
+    (map neuron:set-raw-loss! output-neurons losses)
+    ;; Step 3: Get the gradients at the parameters
+    (let ((param-neurons (map param:get-internal-neuron (module:get-params module))))
+      (map neuron:grad param-neurons))))
+
+;;; Get a list of the gradients of the module's parameters (in the same order as the module's parameters)
+(define (module:get-param-grads module)
+  (map param:get-grad (module:get-params module)))
   
 
 

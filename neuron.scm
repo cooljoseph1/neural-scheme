@@ -44,7 +44,20 @@ A neuron always has the following properties:
 
          (set-inputs! (lambda inps (begin
                                      (set! inputs inps)
-                                     (set! output (apply forward-func inputs))))))
+                                     (set! output (apply forward-func inputs)))))
+                                     
+         ;; Set the loss on the right side of this neuron (i.e. negative of the derivative w.r.t. the output) and use that to infer this neuron's gradient
+         (set-loss! (lambda (loss) (begin
+                                     (if inputs
+                                         #t
+                                         (error "Input not set for this neuron. Did you forget to run a forward pass before back propagating?"))
+                                     (if output
+                                         #t
+                                         (error "Output not set for this neuron. Did you forget to run a forward pass before back propagating?"))
+                                     (let* ((grad-list (backward-func inputs output (- loss))))
+                                       (begin
+                                         (set! gradients (list->vector grad-list))
+                                         gradients))))))
                                       
 
          ;; Setter function for the list of input neurons
@@ -54,7 +67,7 @@ A neuron always has the following properties:
          (define (add-back-prop! back-prop)
                  (set! back-props (cons back-prop back-props)))
 
-    (list forward-pass backward-pass set-input-neurons! add-back-prop! reset! set-inputs!)))
+    (list forward-pass backward-pass set-input-neurons! add-back-prop! reset! set-inputs! set-loss!)))
 
 (define (neuron:get-forward neuron)
   (car neuron))
@@ -90,9 +103,17 @@ A neuron always has the following properties:
 (define (neuron:raw-input-setter neuron)
   (caddr (cdddr neuron)))
 
-;;; Reset to prepare for a new forward pass
+;;; Directly set the inputs to a neuron
 (define (neuron:set-raw-inputs! neuron inputs)
   ((neuron:raw-input-setter neuron) inputs))
+
+
+(define (neuron:raw-loss-setter neuron)
+  (cadddr (cdddr neuron)))
+
+;;; Directly set the loss on the right side of the neuron
+(define (neuron:set-raw-loss! neuron loss)
+  ((neuron:raw-loss-setter neuron) loss))
 
 ;;; Join a neuron together with its input neurons by binding the input neurons to the neuron's inputs and
 ;;; linking together their back propagation
@@ -136,9 +157,9 @@ A neuron always has the following properties:
   (max 0 x))
 
 (define (relu-backward inputs output grad)
-  (if (< output 0)
-      (list 0)
-      (list grad)))
+  (if (> output 0)
+      (list grad)
+      (list 0)))
 
 ;;; Make a ReLU neuron (single input one output)
 (define (make-relu-neuron)
