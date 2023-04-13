@@ -40,7 +40,11 @@ A neuron always has the following properties:
                                          (set! inputs #f)
                                          (set! gradients #f)
                                          (set! output #f))
-                                      #f))))
+                                      #f)))
+
+         (set-inputs! (lambda inps (begin
+                                     (set! inputs inps)
+                                     (set! output (apply forward-func inputs))))))
                                       
 
          ;; Setter function for the list of input neurons
@@ -50,7 +54,7 @@ A neuron always has the following properties:
          (define (add-back-prop! back-prop)
                  (set! back-props (cons back-prop back-props)))
 
-    (list forward-pass backward-pass set-input-neurons! add-back-prop! reset!)))
+    (list forward-pass backward-pass set-input-neurons! add-back-prop! reset! set-inputs!)))
 
 (define (neuron:get-forward neuron)
   (car neuron))
@@ -82,6 +86,13 @@ A neuron always has the following properties:
 ;;; Reset to prepare for a new forward pass
 (define (neuron:reset! neuron)
   ((neuron:reset-getter neuron)))
+
+(define (neuron:raw-input-setter neuron)
+  (caddr (cdddr neuron)))
+
+;;; Reset to prepare for a new forward pass
+(define (neuron:set-raw-inputs! neuron inputs)
+  ((neuron:raw-input-setter neuron) inputs))
 
 ;;; Join a neuron together with its input neurons by binding the input neurons to the neuron's inputs and
 ;;; linking together their back propagation
