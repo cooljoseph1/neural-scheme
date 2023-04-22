@@ -4,7 +4,7 @@
 	(sum-neuron (make-add-neuron))
         (negative-targets (map (lambda x (make-mult-neuron)) target-neurons))
         (diff-neurons (map (lambda x (make-add-neuron)) target-neurons))
-        (diff-squared-neurons (map (lambda x (make-mult-neuron)) target-neurons)))
+        (diff-squared-neurons (map (lambda x (make-pow-neuron 2)) target-neurons)))
 
     (neuron:join! diff-squared-neurons sum-neuron)
     (letrec ((loop (lambda (i)
@@ -12,7 +12,7 @@
 		      (begin
 			(neuron:join! (list (list-ref target-neurons i) (make-input-neuron -1)) (list-ref negative-targets i))
 			(neuron:join! (list (list-ref negative-targets i) (list-ref predicted-neurons i)) (list-ref diff-neurons i))
-			(neuron:join! (list (list-ref diff-neurons i) (list-ref diff-neurons i)) (list-ref diff-squared-neurons i))
+			(neuron:join! (list (list-ref diff-neurons i)) (list-ref diff-squared-neurons i))
             (loop (+ i 1))
             )
             ))))

@@ -161,6 +161,9 @@ A neuron always has the following properties:
       (list grad)
       (list 0)))
 
+(define (make-pow-neuron y)
+  (make-neuron (lambda (x) (expt x y)) (lambda (inputs output grad) 
+  (list (* grad y (expt (car inputs) (- y 1)))))))
 ;;; Make a ReLU neuron (single input one output)
 (define (make-relu-neuron)
   (make-neuron relu-forward relu-backward))
