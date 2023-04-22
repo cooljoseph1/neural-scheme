@@ -16,3 +16,7 @@
 (define (list-compose f g)
   (lambda args
     (apply f (apply g args))))
+
+
+(define (select-value l arg-name)
+  (cadr (find (lambda (elt) (eqv? arg-name (car elt))) l)))

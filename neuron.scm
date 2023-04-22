@@ -196,6 +196,10 @@ A neuron always has the following properties:
 (define (make-identity-neuron)
   (make-neuron identity-forward identity-backward))
 
+(define activation-list (list (list 'sigmoid make-sigmoid-neuron)
+                              (list 'relu make-relu-neuron)
+                              (list 'tanh make-tanh-neuron)))
+
 ;;; Neuron that always fires the same value
 (define (make-input-neuron value)
   (make-neuron (lambda x value) (lambda (inputs output grad) 0)))
@@ -204,3 +208,5 @@ A neuron always has the following properties:
 (define (make-neuron-controllable)
   (let ((val 0))
     (list (lambda (x) (set! val x)) (make-neuron (lambda x val) (lambda (inputs output grad) 0)))))
+
+
