@@ -1,0 +1,25 @@
+;;; MSE loss function
+(define (loss:mse module target-neurons)
+  (let ((predicted-neurons (module:get-output-neurons module))
+	(sum-neuron (make-add-neuron))
+        (negative-targets (map (lambda x (make-mult-neuron)) target-neurons))
+        (diff-neurons (map (lambda x (make-add-neuron)) target-neurons))
+        (diff-squared-neurons (map (lambda x (make-mult-neuron)) target-neurons)))
+
+    (neuron:join! diff-squared-neurons sum-neuron)
+    (letrec ((loop (lambda (i)
+		  (if (< i (length predicted-neurons))
+		      (begin
+			(neuron:join! (list (list-ref target-neurons i) (make-input-neuron -1)) (list-ref negative-targets i))
+			(neuron:join! (list (list-ref negative-targets i) (list-ref predicted-neurons i)) (list-ref diff-neurons i))
+			(neuron:join! (list (list-ref diff-neurons i) (list-ref diff-neurons i)) (list-ref diff-squared-neurons i))
+            (loop (+ i 1))
+            )
+            ))))
+      (loop 0)
+      (make-module (module:get-input-neurons module)
+		   (list sum-neuron)
+		   (module:get-params module)
+		   (lambda () (begin
+				(map neuron:reset! (append (list sum-neuron) negative-targets diff-neurons diff-squared-neurons target-neurons))
+				(module:reset! module)))))))

@@ -199,3 +199,8 @@ A neuron always has the following properties:
 ;;; Neuron that always fires the same value
 (define (make-input-neuron value)
   (make-neuron (lambda x value) (lambda (inputs output grad) 0)))
+
+;;; return (setter function, neuron)
+(define (make-neuron-controllable)
+  (let ((val 0))
+    (list (lambda (x) (set! val x)) (make-neuron (lambda x val) (lambda (inputs output grad) 0)))))

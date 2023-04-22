@@ -38,7 +38,8 @@
 
 ;;; Reset the module to prepare for a forward pass
 (define (module:reset! module)
-  ((module:get-reset-function module)))
+  ((module:get-reset-function module))
+  (map param:zero-grad! (module:get-params module)))
 
 ;;; Given a list of inputs, run it through the module. (Note: This is mostly only so complicated because we have to attach temporary inputs)
 (define (module:forward module inputs)
@@ -130,7 +131,7 @@
 
 ;;; Make a basic module that applies an activation function to an input neuron
 (define (module-activation input-neuron)
-  (let* ((output-neuron (make-relu-neuron))) ;; TODO: Allow other activation functions
+  (let* ((output-neuron (make-sigmoid-neuron))) ;; TODO: Allow other activation functions
     (neuron:join! (list input-neuron) output-neuron)
     (make-module (list input-neuron)
                  (list output-neuron)
