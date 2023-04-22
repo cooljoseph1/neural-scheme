@@ -74,7 +74,9 @@
 
 #| Ways to combine modules |#
 
-;;; Join the outputs of module1 with the inputs of module2, matching them up one by one
+;;; Returns a new module that is a combination of module1 and module2, matching up the outputs
+;;; of module1 with the inputs of module2.
+;;; NOTE: Don't try joining together multiple things to the same modoule2. It won't work correctly!
 (define (module:join! module1 module2)
   (let ((outputs1 (module:get-output-neurons module1))
         (inputs2 (module:get-input-neurons module2)))
@@ -129,6 +131,21 @@
                            (neuron:reset! weight-neuron)
                            (neuron:reset! input-neuron))))))
 
+;;; Make a basic module that adds a bias to an input neuron
+(define (module-single-bias input-neuron)
+  (let* ((param (param-uniform-random)) ;; TODO: Allow other random initializations of the parameter
+         (weight-neuron (param:get-internal-neuron param))
+         (new-neuron (make-add-neuron)))
+    (neuron:join! (list input-neuron weight-neuron) new-neuron)
+    (make-module (list input-neuron)
+                 (list new-neuron)
+                 (list param)
+                 (lambda ()
+                         (begin
+                           (neuron:reset! new-neuron)
+                           (neuron:reset! weight-neuron)
+                           (neuron:reset! input-neuron))))))
+
 ;;; Make a basic module that applies an activation function to an input neuron
 (define (module-activation input-neuron)
   (let* ((output-neuron (make-sigmoid-neuron))) ;; TODO: Allow other activation functions
@@ -145,8 +162,10 @@
 (define (module-perceptron input-neurons)
   (let ((linear-module (apply module:add-right
                              (map module-single-weight input-neurons)))
+        (bias (module-single-bias (make-identity-neuron)))
         (act-module (module-activation (make-identity-neuron))))
-    (module:join! linear-module act-module)))
+    (module:join! (module:join! linear-module bias)
+                  act-module)))
 
 ;;; Return a fully connected layer with the corresponding number of inputs and outputs
 (define (module-fc num-inputs num-outputs)
