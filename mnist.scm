@@ -24,6 +24,11 @@
 (define (mnist-one-hot-encode index)
     (build-list 10 (lambda (i) (if (= i index) 1 0))))
 
+(define (max-idx vals)
+  (list-index (apply max vals)))
+
 (define (load-mnist filename)
   (let ((raw-data (cdr (parse-csv-file filename))))
-    (map (lambda (line) (list (map string->number (cdr line)) (string->number (car line)))) raw-data)))
+    (map (lambda (line) (list (map string->number (cdr line)) 
+                        (mnist-one-hot-encode (string->number (car line)))))
+          raw-data)))
