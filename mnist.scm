@@ -1,6 +1,6 @@
 (define (parse-csv-file filename)
   (let ((lines (file->lines filename)))
-    (map (lambda (line) (string-split line ","))
+    (map (lambda (line) (string-split (string-trim line) ","))
          lines)))
 
 (define (file->lines filename)
@@ -30,5 +30,5 @@
 (define (load-mnist filename)
   (let ((raw-data (cdr (parse-csv-file filename))))
     (map (lambda (line) (list (map string->number (cdr line)) 
-                        (mnist-one-hot-encode (string->number (car line)))))
+                        (string->number (car line))))
           raw-data)))
