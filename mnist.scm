@@ -25,7 +25,7 @@
     (map (lambda (i) (if (= i index) 1 0)) (iota 10)))
 
 (define (max-idx vals)
-  (list-index (apply max vals) vals))
+  (list-index (lambda (x) (eqv? x (apply max vals))) vals))
 
 (define (load-mnist filename)
   (let ((raw-data (cdr (parse-csv-file filename))))
