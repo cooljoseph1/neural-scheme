@@ -6,7 +6,7 @@
 	    (data (load-mnist "mnist_train.csv"))
 	    (expected (map (lambda x (make-neuron-controllable)) (iota 10)))
 	    (loss-module (loss:cross-entropy test-module (map cadr expected)))
-	    (opt (make-adam-optimizer 0.001 loss-module))
+	    (opt (make-sgd-optimizer 0.001 loss-module))
 	    (loop (lambda (i)
 		    (if (< i 100)
 			(let* ((sample (list-ref data (random (length data))))
