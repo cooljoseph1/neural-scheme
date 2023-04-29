@@ -77,7 +77,7 @@
 ;;; Returns a new module that is a combination of module1 and module2, matching up the outputs
 ;;; of module1 with the inputs of module2.
 ;;; NOTE: Don't try joining together multiple things to the same modoule2. It won't work correctly!
-(define (module:join! module1 module2)
+(define (module:join2! module1 module2)
   (let ((outputs1 (module:get-output-neurons module1))
         (inputs2 (module:get-input-neurons module2)))
     ;; Error if length mismatch
@@ -91,6 +91,11 @@
                  (lambda () (begin
                               (module:reset! module1)
                               (module:reset! module2))))))
+
+(define (module:join! . modules)
+  (if (< 1 (length modules))
+        (module:join2! (car modules) (apply module:join! (cdr modules)))
+        (car modules)))
 
 ;;; Return a new module that is a list of neurons (with no parameters)
 (define (module:neuron-list . neurons)
@@ -147,25 +152,25 @@
                            (neuron:reset! input-neuron))))))
 
 ;;; Make a basic module that applies an activation function to an input neuron
-(define (module-activation input-neuron)
-  (let* ((output-neuron (make-relu-neuron))) ;; TODO: Allow other activation functions
-    (neuron:join! (list input-neuron) output-neuron)
-    (make-module (list input-neuron)
-                 (list output-neuron)
+(define (module-activation size output-creator)
+  (let* ((input-neurons (map (lambda x (make-identity-neuron)) (iota size)))
+    (output-neurons (map (lambda x (output-creator)) input-neurons))) ;; TODO: Allow other activation functions
+    (map (lambda (i)
+    (neuron:join! (list (list-ref input-neurons i)) (list-ref output-neurons i))) (iota (length input-neurons)))
+    (make-module input-neurons
+                 output-neurons
                  '()
                  (lambda ()
                          (begin
-                           (neuron:reset! output-neuron)
-                           (neuron:reset! input-neuron))))))
+                           (map (lambda (neuron) (neuron:reset! neuron)) input-neurons)
+                           (map (lambda (neuron) (neuron:reset! neuron)) output-neurons))))))
 
 ;;; Return a module that runs a perceptron on the input neurons
 (define (module-perceptron input-neurons)
   (let ((linear-module (apply module:add-right
                              (map module-single-weight input-neurons)))
-        (bias (module-single-bias (make-identity-neuron)))
-        (act-module (module-activation (make-identity-neuron))))
-    (module:join! (module:join! linear-module bias)
-                  act-module)))
+        (bias (module-single-bias (make-identity-neuron))))
+    (module:join! linear-module bias)))
 
 ;;; Return a fully connected layer with the corresponding number of inputs and outputs
 (define (module-fc num-inputs num-outputs)

@@ -1,7 +1,7 @@
 (load "load.scm")
 ;; regression
 (define (train)
-  (letrec* ((test-module (module:join! (module-fc 2 10) (module-fc 10 1)))
+  (letrec* ((test-module (module:join! (module-fc 2 10) (module-activation 10 make-relu-neuron) (module-fc 10 1)))
 	    (data '(((1 0) 1) ((0 0) 0) ((0 1) 1) ((1 1) 0)))
 	    (expected (make-neuron-controllable))
 	    (loss-module (loss:mse test-module (list (cadr expected))))
@@ -30,7 +30,7 @@
 ;; classification
 (load "load.scm")
 (define (train)
-  (letrec* ((test-module (module:join! (module-fc 2 40) (module-fc 40 2)))
+  (letrec* ((test-module (module:join! (module-fc 2 40) (module-activation 40 make-relu-neuron) (module-fc 40 2)))
 	    (data '(((1 0) 1) ((0 0) 0) ((0 1) 1) ((1 1) 0)))
 	    (expected (map (lambda x (make-neuron-controllable)) (list 0 1)))
 	    (loss-module (loss:cross-entropy test-module (map cadr expected)))
