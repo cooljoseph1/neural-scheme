@@ -1,7 +1,7 @@
 (load "load.scm")
 
 
-(define (train)
+(define (train-mnist)
   (letrec* ((test-module (module:join! (module-fc 784 20) (module-activation 20 make-relu-neuron) (module-fc 20 10)))
 	    (data (load-mnist "mnist_train.csv"))
 	    (expected (make-neuron-controllable))
@@ -29,7 +29,7 @@
     (loop 0)))
 
 
-(define (test module)
+(define (test-mnist module)
   (letrec* (
     (data (load-mnist "mnist_test.csv"))
 	(expected (make-neuron-controllable))
@@ -54,6 +54,3 @@
 
     (loop 0)))
 
-(define module (train))
-
-(pp (list '%correct: (/ (test module) 100)))
