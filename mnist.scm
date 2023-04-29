@@ -22,7 +22,7 @@
 
 
 (define (mnist-one-hot-encode index)
-    (build-list 10 (lambda (i) (if (= i index) 1 0))))
+    (map (lambda (i) (if (= i index) 1 0)) (iota 10)))
 
 (define (max-idx vals)
   (list-index (apply max vals)))
