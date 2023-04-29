@@ -5,7 +5,7 @@
   (letrec* ((test-module (module:join! (module-fc 784 20) (module-activation 20 make-relu-neuron) (module-fc 20 10)))
 	    (data (load-mnist "mnist_train.csv"))
 	    (expected (make-neuron-controllable))
-	    (loss-module (loss:cross-entropy test-module (list (cadr expected))))
+	    (loss-module (loss:cross-entropy test-module (map cadr expected)))
 	    (opt (make-adam-optimizer 0.001 loss-module))
 	    (loop (lambda (i)
 		    (if (< i 100)
@@ -33,7 +33,7 @@
   (letrec* (
     (data (load-mnist "mnist_test.csv"))
 	(expected (make-neuron-controllable))
-    (loss-module (loss:cross-entropy test-module (list (cadr expected))))
+    (loss-module (loss:cross-entropy test-module (map cadr expected)))
     (loop (lambda (i corr)
 		    (if (< i 100)
 			(let* ((sample (list-ref data (random (length data))))
