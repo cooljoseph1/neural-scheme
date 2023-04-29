@@ -151,6 +151,32 @@ A neuron always has the following properties:
 (define (make-mult-neuron)
   (make-neuron mult-forward mult-backward))
 
+(define (exp-forward x)
+  (exp x))
+(define (exp-backward inputs output grad)
+  (list (* grad (exp-forward (car inputs)))))
+
+(define (make-exp-neuron)
+  (make-neuron exp-forward exp-backward))
+
+(define (div-forward x y)
+  (/ x y))
+
+(define (div-backward inputs output grad)
+  (map (lambda (x) (* x grad)) (list (/ 1 (cadr inputs)) (- (/ (car inputs) (* (cadr inputs) (cadr inputs)))))))
+
+(define (make-div-neuron)
+  (make-neuron div-forward div-backward))
+
+(define (log-forward x)
+  (log x))
+
+(define (log-backward inputs output grad)
+  (list (* grad (/ 1 (car inputs)))))
+
+(define (make-log-neuron)
+  (make-neuron log-forward log-backward))
+
 #| Activation neurons |#
 ;;; ReLU
 (define (relu-forward x)

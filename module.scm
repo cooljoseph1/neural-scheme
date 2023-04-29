@@ -148,7 +148,7 @@
 
 ;;; Make a basic module that applies an activation function to an input neuron
 (define (module-activation input-neuron)
-  (let* ((output-neuron (make-sigmoid-neuron))) ;; TODO: Allow other activation functions
+  (let* ((output-neuron (make-relu-neuron))) ;; TODO: Allow other activation functions
     (neuron:join! (list input-neuron) output-neuron)
     (make-module (list input-neuron)
                  (list output-neuron)
